@@ -49,50 +49,101 @@ def display_location(player_location):
    
 # Morning task
 def move_player(direction, game_state):
-    # game_state = [player_location, player_health, player_score, player_inventory, game_quit]
+    current_location = game_state[0]
+    current_location_props = rooms[current_location]
+    
+    # print(dict(current_location_props["exits"].items()))
+    
+    if direction in current_location_props["exits"]:
+        # game_state[0] = rooms[current_location]
+        # print(current_location_props["exits"].items())
+        # print(current_location_props["exits"][direction])
+        game_state[0] = current_location_props["exits"][direction]
+        game_state[1]-=10
+        game_state[2]+=10
+        random_event(game_state)
+    else:
+        print("Cannot go the that direction !")
    
-    # To be implemented
     pass
 
 
 # Morning task
 def take_item(item_name, game_state):
     # game_state = [player_location, player_health, player_score, player_inventory, game_quit]
+    
+    if item_name in rooms[game_state[0]]["items"]:
+        game_state[3].append(rooms[game_state[0]]["items"][rooms[game_state[0]]["items"].index(item_name)])
+        rooms[game_state[0]]["items"].remove(rooms[game_state[0]]["items"][rooms[game_state[0]]["items"].index(item_name)])
+        game_state[2]+=15
+        random_event(game_state)
+        # print(game_state[3])
+    else:
+        print("Item not found !")
 
-
-    # To be implemented
     pass
 
 
 # Morning task
 def check_win_condition(game_state):
-    # Check if player has collected the treasure
-    # To be implemented
+    if len(rooms["mountain"]["items"]) == 0:
+        return True
     pass
 
 
 def display_stats(game_state):
-    # To be implemented
+    print("Player Status\n" + "------------------------")
+    print("Health :", game_state[1])
+    print("Score :", game_state[2])
+    show_inventory(game_state)
     pass
 
 
 def show_inventory(game_state):
-    # To be implemented
+    print("You currently have...")
+    print("------------------------\n")
+    if len(game_state[3]) == 0:
+        print("No Items")
+    else:
+        for i in range(len(game_state[3])):
+            print("*", game_state[3][i])
+    print("\n------------------------")
     pass
 
 
 def random_event(game_state):
-    # To be implemented
+    events = [["Sunglasses", "Umbrella", "Car", "10Kg Bomb", "Notebook", "Apple", "Banana", "Trash", "Snake", "Sand", "Mask", "Drug", "Flower", "Gun", "Medicine"],
+              [5, 10, 20, 30, 35, 40, 45, 50], 
+              [-5, -10, -15]]
+    random_case = random.randrange(0, 3)
+    
+    if random_case == 0:
+        random1 = random.choice(events[0])
+        game_state[3].append(random1)
+        print("You got", random1)
+    elif random_case == 1:
+        random2 = random.choice(events[1])
+        game_state[1] = game_state[1] + random2
+        print("Your health got increased by", random2)
+    elif random_case == 2:
+        random3 = random.choice(events[2])
+        game_state[1] = game_state[1] - random3
+        print("Your health got decreased by", random3)
     pass
 
 
 def use_item(item_name, game_state):
-    # To be implemented
+    if item_name in game_state[3]:
+        print("Use", item_name)
+        game_state[3].remove(item_name)
+    else:
+        print("Item not found !")
     pass
 
 
 def check_lose_condition(game_state):
-    # To be implemented
+    if game_state[1] == 0:
+        return True
     pass
 
 
@@ -122,13 +173,13 @@ def process_command(command, game_state):
     elif action == 'take' and len(parts) > 1:
         take_item(parts[1], game_state)
     elif action == 'use' and len(parts) > 1:
-        print("To be implemented")
+        use_item(parts[1], game_state)
     elif action == 'inventory':
-        print("To be implemented")
+        show_inventory(game_state)
     elif action == 'look':
         display_location(game_state[0])
     elif action == 'stats':
-        print("To be implemented")
+        display_stats(game_state)
     elif action == 'help':
         show_help()
     elif action == 'quit':
@@ -141,6 +192,7 @@ def process_command(command, game_state):
 def main():
    
     # Player state
+    
     player_location = 'forest'
     player_inventory = []
     player_health = 100
@@ -164,6 +216,7 @@ def main():
        
         # Check win conditions
         game_win = check_win_condition(current_game_state)
+        game_lose = check_lose_condition(current_game_state)
        
         game_quit = current_game_state[4]
         if game_quit:
@@ -178,7 +231,7 @@ def main():
         print("💀 GAME OVER 💀")
         print("Your health reached zero. Better luck next time!")
    
-    print(f"\nFinal Score: {player_score}")
+    print(f"\nFinal Score: " + str(current_game_state[2]))
     print(f"Items Collected: {len(player_inventory)}")
     print("="*50)
 
